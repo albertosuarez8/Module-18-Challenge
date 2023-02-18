@@ -5,11 +5,13 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index"
+    "start": "node server.js",
+    "seed": "node utils/seed"
   },
   "author": "Alberto Suarez",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^6.9.1"
+    "express": "^4.18.2",
+    "mongoose": "^6.9.2"
   }
 }
