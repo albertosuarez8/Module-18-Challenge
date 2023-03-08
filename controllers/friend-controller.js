@@ -2,10 +2,10 @@ const { User } = require('../models');
 
 const friendController = {
   // add a friend
-  addFriend({ params }, res) {
+  addFriend(req, res) {
     User.findOneAndUpdate(
-      { _id: params.userId },
-      { $addToSet: { friends: params.friendId } },
+      { _id: req.params.userId },
+      { $addToSet: { friends: req.params.friendId } },
       { new: true }
     )
       .then(dbUserData => {

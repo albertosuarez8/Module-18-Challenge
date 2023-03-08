@@ -18,8 +18,8 @@ const thoughtController = {
   },
 
   // get thought by id
-  getThoughtById({ params }, res) {
-    Thought.findOne({ _id: params.thoughtId })
+  getThoughtById(req, res) {
+    Thought.findOne({ _id: req.params.thoughtId })
       .populate({
         path: 'reactions',
         select: '-__v'
@@ -40,23 +40,26 @@ const thoughtController = {
   },
 
   // create thought
-  createThought({ params, body }, res) {
-    Thought.create(body)
-      .then(({ _id }) => {
+  createThought(req, res) {
+    Thought.create(req.body)
+      .then((thought) => {
         return User.findOneAndUpdate(
-          { _id: params.userId },
-          { $push: { thoughts: _id } },
+          { username: req.body.username },
+          { $addToSet: { thoughts: thought._id } },
           { new: true }
         );
       })
-      .then(dbUserData => {
-        if (!dbUserData) {
-          res.status(404).json({ message: 'No user found with this id!' });
-          return;
+      .then((user) => {
+        if (!user) {
+          res.status(404).json({ message: "Unable to create thought!" });
+        } else {
+          res.json("Thought created!");
         }
-        res.json(dbUserData);
       })
-      .catch(err => res.status(400).json(err));
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
   },
 
   // update thought by id
@@ -73,25 +76,14 @@ const thoughtController = {
   },
 
   // delete thought by id
-  deleteThought({ params }, res) {
-    Thought.findOneAndDelete({ _id: params.thoughtId })
+  deleteThought(req, res) {
+    Thought.findOneAndDelete({ _id: req.params.thoughtId })
       .then(deletedThought => {
         if (!deletedThought) {
           res.status(404).json({ message: 'No thought found with this id!' });
           return;
         }
-        return User.findOneAndUpdate(
-          { _id: deletedThought.userId },
-          { $pull: { thoughts: params.thoughtId } },
-          { new: true }
-        );
-      })
-      .then(dbUserData => {
-        if (!dbUserData) {
-          res.status(404).json({ message: 'No user found with this id!' });
-          return;
-        }
-        res.json(dbUserData);
+        res.status(200).json({message: "Thought deleted!"})
       })
       .catch(err => res.status(400).json(err));
   }
